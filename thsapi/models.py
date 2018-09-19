@@ -1,7 +1,7 @@
-from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 
-app = Flask(__name__)
+from thsapi import app
+
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///sqlite.db'
 db = SQLAlchemy(app)
 
@@ -26,11 +26,6 @@ class Descriptor(db.Model):
             secondary=taxonomy_table,
             primaryjoin=taxonomy_table.c.parent_id==id,
             secondaryjoin=taxonomy_table.c.child_id==id,
-            back_populates="children")
-    children = db.relationship("Descriptor",
-            secondary=taxonomy_table,
-            primaryjoin=taxonomy_table.c.parent_id==id,
-            secondaryjoin=taxonomy_table.c.child_id==id,
-            back_populates="parents")
+            backref="children")
 
 
