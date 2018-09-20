@@ -35,3 +35,10 @@ def get_or_create(model, _id, **kwargs):
     return obj
 
 
+def get(model, _id):
+    try:
+        return model.query.filter_by(id=_id).one()
+    except:
+        return None
+
+

@@ -1,6 +1,6 @@
 from flask import jsonify
 
-from thsapi import app, couch
+from thsapi import app, couch, models
 
 from thsapi.models import Descriptor, db, taxonomy_table
 
@@ -46,17 +46,88 @@ def tables_populate():
 
 
 @app.route('/ths/get/<string:thsid>')
-def get(thsid):
-    try:
-        entry = Descriptor.query.filter_by(id=thsid).one()
+def get_descriptor(thsid):
+    entry = models.get(Descriptor, thsid)
+    if entry:
         return jsonify(
                 id=entry.id,
                 name=entry.name,
                 type=entry.type,
                 parents=[p.id for p in entry.parents],
                 children=[c.id for c in entry.children])
-    except:
+    else:
         return '404'
 
+
+
+def get_descriptor_listed_relatives(entries):
+    return [{
+        'id': r.id,
+        'name': r.name,
+        'type': r.type} for r in entries]
+
+
+get_descriptor_parents = lambda entry: get_descriptor_listed_relatives(entry.parents)
+get_descriptor_chilren = lambda entry: get_descriptor_listed_relatives(entry.children)
+
+
+def get_descriptor_root(entry):
+    frontier = entry.parents
+    visited = set()
+    roots = set()
+    while len(frontier) > 0:
+        parent = frontier.pop()
+        if parent not in visited:
+            if len(parent.parents) > 0:
+                frontier.extend(parent.parents)
+            else:
+                roots.add(parent)
+        visited.add(parent)
+    return get_descriptor_listed_relatives(roots)
+
+
+
+
+
+@app.route('/ths/get/<string:thsid>/<string:field>')
+def get_descriptor_field(thsid, field):
+    if len(field) > 24 or field not in [
+            'name',
+            'type',
+            'parents',
+            'children',
+            'root']:
+        return 500
+    entry = models.get(Descriptor, thsid)
+    if entry:
+        if field in ['name', 'type']:
+            return entry.__dict__.get(field)
+        return jsonify(globals().get('get_descriptor_{}'.format(field))(entry))
+    return '404'
+        
+
+@app.route('/ths/find/prefix/<string:prefix>')
+def search_for_prefix(prefix):
+    matches = Descriptor.query.filter(Descriptor.name.like('{}%'.format(prefix))).all()
+    return jsonify(get_descriptor_listed_relatives(
+        sorted(matches,
+            key=lambda m:m.name.lower())[:50]))
+
+
+@app.route('/ths/find/prefix/<string:type>/<string:prefix>')
+def search_for_prefix_typed(prefix, type):
+    matches = Descriptor.query.filter(Descriptor.name.like('{}%'.format(prefix))).filter_by(type=type)
+    return jsonify(get_descriptor_listed_relatives(
+        sorted(matches,
+            key=lambda m:m.name.lower())[:50]))
+
+
+
+@app.route('/ths/find/infix/<string:infix>')
+def search_for_infix(infix):
+    matches = Descriptor.query.filter(Descriptor.name.like('%{}%'.format(infix))).all()
+    return jsonify(get_descriptor_listed_relatives(
+        sorted(matches,
+            key=lambda m:m.name)[:50]))
 
 
