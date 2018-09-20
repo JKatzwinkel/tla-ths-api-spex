@@ -34,7 +34,7 @@ Man sucht eintraege deren `name` feld mit dem angegebenen `prefix` beginnen. Das
 
 Die ergebnisse werden alphabetisch sortiert nach `name` und auf `50` stueck begrenzt. Beispiel:
 
-    http://tladev.bbaw.de:5002/ths/find/prefix/h
+    -XGET http://tladev.bbaw.de:5002/ths/find/prefix/h
     [
         {
             "type": "location",
@@ -61,4 +61,15 @@ Die ergebnisse werden alphabetisch sortiert nach `name` und auf `50` stueck begr
 
 - method: GET
 
-Man sucht eintraege mit einem bestimmten `type`, deren `name` mit dem angegebenen prefix beginnen. Ansonsten gelten dieselben bedingungen wie bei der normalen prefix-suche.
+Man sucht eintraege mit einem bestimmten `type`, deren `name` mit dem angegebenen prefix beginnen. Ansonsten gelten dieselben bedingungen wie bei der [normalen prefix-suche](#thsfindprefixstringprefix).
+
+Beispiel: 
+
+    -XGET http://tladev.bbaw.de:5002/ths/find/prefix/location/saqqara
+    [
+        {
+            "type": "location",
+            "name": "Saqqara",
+            "id": "T66IQ2R26NHZTMIVAS7SVLRWGI"
+        }
+    ]
