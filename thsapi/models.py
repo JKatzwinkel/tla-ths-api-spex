@@ -24,3 +24,14 @@ class Descriptor(db.Model):
             backref="children")
 
 
+
+def get_or_create(model, _id, **kwargs):
+    try:
+        obj = model.query.filter_by(id=_id).one()
+        for key, value in kwargs:
+            obj.__dict__[key] = value
+    except:
+        obj = model(id=_id, **kwargs)
+    return obj
+
+
