@@ -1,3 +1,5 @@
+from flask import jsonify
+
 from thsapi import app, couch
 
 from thsapi.models import Descriptor, db, taxonomy_table
@@ -45,9 +47,16 @@ def tables_populate():
 
 @app.route('/ths/get/<string:thsid>')
 def get(thsid):
-    matches = Descriptor.query.filter_by(id=thsid)
-    if matches:
-        return matches.first().name
+    try:
+        entry = Descriptor.query.filter_by(id=thsid).one()
+        return jsonify(
+                id=entry.id,
+                name=entry.name,
+                type=entry.type,
+                parents=[p.id for p in entry.parents],
+                children=[c.id for c in entry.children])
+    except:
+        return '404'
 
 
 
