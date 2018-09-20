@@ -2,12 +2,7 @@ from flask_sqlalchemy import SQLAlchemy
 
 from thsapi import app
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///sqlite.db'
 db = SQLAlchemy(app)
-
-#from sqlalchemy.ext.declarative import declarative_base
-
-#Base = declarative_base()
 
 
 taxonomy_table = db.Table('taxonomy', db.Model.metadata,
