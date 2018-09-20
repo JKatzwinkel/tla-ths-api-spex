@@ -19,8 +19,8 @@ class Descriptor(db.Model):
     type = db.Column(db.String(80), nullable=False)
     parents = db.relationship("Descriptor",
             secondary=taxonomy_table,
-            primaryjoin=taxonomy_table.c.parent_id==id,
-            secondaryjoin=taxonomy_table.c.child_id==id,
+            primaryjoin=taxonomy_table.c.child_id==id,
+            secondaryjoin=taxonomy_table.c.parent_id==id,
             backref="children")
 
 
