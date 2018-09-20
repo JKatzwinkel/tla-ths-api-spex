@@ -19,7 +19,6 @@ Pygments==2.2.0
 simplegeneric==0.8.1
 six==1.11.0
 SQLAlchemy==1.2.11
--e git+ssh://jhoeper@git.bbaw.de/home/jhoeper/tladev/tla-ths.git@8fe0c181cb79de6c3c4618cbfdca35d22cd8e0f8#egg=thsapi
 traitlets==4.3.2
 wcwidth==0.1.7
 Werkzeug==0.14.1

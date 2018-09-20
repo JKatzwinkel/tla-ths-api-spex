@@ -4,6 +4,7 @@ from thsapi import app, couch, models
 
 from thsapi.models import Descriptor, db, taxonomy_table
 
+db.create_all()
 
 @app.route('/ths/tables/populate')
 def tables_populate():
@@ -42,7 +43,7 @@ def tables_populate():
 
     db.session.commit()
     return 'Populated descriptor table with {} entries'.format(len(relations))
-    
+
 
 
 @app.route('/ths/get/<string:thsid>')
@@ -104,7 +105,7 @@ def get_descriptor_field(thsid, field):
             return entry.__dict__.get(field)
         return jsonify(globals().get('get_descriptor_{}'.format(field))(entry))
     return '404'
-        
+
 
 @app.route('/ths/find/prefix/<string:prefix>')
 def search_for_prefix(prefix):
