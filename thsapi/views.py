@@ -69,10 +69,10 @@ def get_descriptor_listed_relatives(entries):
 
 
 get_descriptor_parents = lambda entry: get_descriptor_listed_relatives(entry.parents)
-get_descriptor_chilren = lambda entry: get_descriptor_listed_relatives(entry.children)
+get_descriptor_children = lambda entry: get_descriptor_listed_relatives(entry.children)
 
 
-def get_descriptor_root(entry):
+def get_descriptor_roots(entry):
     frontier = entry.parents
     visited = set()
     roots = set()
@@ -97,13 +97,14 @@ def get_descriptor_field(thsid, field):
             'type',
             'parents',
             'children',
-            'root']:
+            'roots']:
         return 500
     entry = models.get(Descriptor, thsid)
     if entry:
         if field in ['name', 'type']:
             return entry.__dict__.get(field)
-        return jsonify(globals().get('get_descriptor_{}'.format(field))(entry))
+        elif field in ['parents', 'children', 'roots']:
+            return jsonify(globals().get('get_descriptor_{}'.format(field))(entry))
     return '404'
 
 
