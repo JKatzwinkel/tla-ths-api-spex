@@ -24,7 +24,7 @@ Man gibt die 24-stellige ID des thesauruseintrags an und bekommt eine `applicati
 
 - method: `GET`
 
-Man gibt zusaetzlich zur 24-stelligen ID noch den namen der eigenschaft an, die man haben will. Moeglich sind `name`, `type`, `root`, `parents`, `children`. Bei letzteren drei erhaelt man eine JSON response mit einer liste (ein eintrag kann mehrere wurzelelemente haben) von objekten mit jeweils `id` und `name` der verwandten thesauruseintraege. Wenn man `name` oder `type` anfragt, bekommt man eine `text/html` response wo nur der gewuenschte inhalt drin steht.
+Man gibt zusaetzlich zur 24-stelligen ID noch den namen der eigenschaft an, die man haben will. Moeglich sind `name`, `type`, `roots`, `parents`, `children`. Bei letzteren drei erhaelt man eine JSON response mit einer liste (ein eintrag kann mehrere wurzelelemente haben) von objekten mit jeweils `id` und `name` der verwandten thesauruseintraege. Wenn man `name` oder `type` anfragt, bekommt man eine `text/html` response wo nur der gewuenschte inhalt drin steht.
 
 ### `/ths/find/prefix/<string:prefix>`
 
