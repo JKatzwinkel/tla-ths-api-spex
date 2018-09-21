@@ -6,7 +6,7 @@ from thsapi.models import Descriptor, db, taxonomy_table
 
 db.create_all()
 
-@app.route('/ths/tables/populate')
+@app.route('/ths/tables/populate', methods=['GET'])
 def tables_populate():
     ths_collection = couch.server['aaew_ths']
     view = couch.apply_view(ths_collection, 'ths/all_active_thsentry_objects')
@@ -46,7 +46,7 @@ def tables_populate():
 
 
 
-@app.route('/ths/get/<string:thsid>')
+@app.route('/ths/get/<string:thsid>', methods=['GET'])
 def get_descriptor(thsid):
     entry = models.get(Descriptor, thsid)
     if entry:
@@ -90,7 +90,7 @@ def get_descriptor_roots(entry):
 
 
 
-@app.route('/ths/get/<string:thsid>/<string:field>')
+@app.route('/ths/get/<string:thsid>/<string:field>', methods=['GET'])
 def get_descriptor_field(thsid, field):
     if len(field) > 24 or field not in [
             'name',
@@ -108,7 +108,7 @@ def get_descriptor_field(thsid, field):
     return '404'
 
 
-@app.route('/ths/find/prefix/<string:prefix>')
+@app.route('/ths/find/prefix/<string:prefix>', methods=['GET'])
 def search_for_prefix(prefix):
     matches = Descriptor.query.filter(Descriptor.name.like('{}%'.format(prefix))).all()
     return jsonify(get_descriptor_listed_relatives(
@@ -116,7 +116,7 @@ def search_for_prefix(prefix):
             key=lambda m:m.name.lower())[:50]))
 
 
-@app.route('/ths/find/prefix/<string:type>/<string:prefix>')
+@app.route('/ths/find/prefix/<string:type>/<string:prefix>', methods=['GET'])
 def search_for_prefix_typed(prefix, type):
     matches = Descriptor.query.filter(Descriptor.name.like('{}%'.format(prefix))).filter_by(type=type)
     return jsonify(get_descriptor_listed_relatives(
@@ -125,7 +125,7 @@ def search_for_prefix_typed(prefix, type):
 
 
 
-@app.route('/ths/find/infix/<string:infix>')
+@app.route('/ths/find/infix/<string:infix>', methods=['GET'])
 def search_for_infix(infix):
     matches = Descriptor.query.filter(Descriptor.name.like('%{}%'.format(infix))).all()
     return jsonify(get_descriptor_listed_relatives(
