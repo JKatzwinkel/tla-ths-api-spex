@@ -200,31 +200,3 @@ def search_descriptors():
 
 
 
-@app.route('/ths/search/<string:position>/<string:term>', methods=['GET'])
-def search_for_term(term, position):
-
-    """ retrieve matching entries from database """
-    matches = Descriptor.query.filter(Descriptor.name.like('{}%'.format(term))).all()
-    return jsonify(make_simple_dict_list(
-        sorted(matches,
-            key=lambda m:m.name.lower())[:50]))
-
-
-@app.route('/ths/search/<string:type>/<string:position>/<string:term>', methods=['GET'])
-def search_for_term_typed(term, type):
-
-    matches = Descriptor.query.filter(Descriptor.name.like('{}%'.format(prefix))).filter_by(type=type)
-    return jsonify(make_simple_dict_list(
-        sorted(matches,
-            key=lambda m:m.name.lower())[:50]))
-
-
-
-@app.route('/ths/search/infix/<string:infix>', methods=['GET'])
-def search_for_infix(infix):
-    matches = Descriptor.query.filter(Descriptor.name.like('%{}%'.format(infix))).all()
-    return jsonify(make_simple_dict_list(
-        sorted(matches,
-            key=lambda m:m.name)[:50]))
-
-
