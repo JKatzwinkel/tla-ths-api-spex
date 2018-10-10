@@ -101,15 +101,15 @@ def get_descriptor_field(thsid, field):
 
 
 
-def get_descriptor_listed_relatives(entries):
+def make_simple_dict_list(entries):
     return [{
         'id': r.id,
         'name': r.name,
         'type': r.type} for r in entries]
 
 
-get_descriptor_parents = lambda entry: get_descriptor_listed_relatives(entry.parents)
-get_descriptor_children = lambda entry: get_descriptor_listed_relatives(entry.children)
+get_descriptor_parents = lambda entry: make_simple_dict_list(entry.parents)
+get_descriptor_children = lambda entry: make_simple_dict_list(entry.children)
 
 
 def get_descriptor_roots(entry):
@@ -124,7 +124,7 @@ def get_descriptor_roots(entry):
             else:
                 roots.add(parent)
         visited.add(parent)
-    return get_descriptor_listed_relatives(roots)
+    return make_simple_dict_list(roots)
 
 
 
@@ -160,7 +160,7 @@ def search_for_prefix(prefix):
 def search_for_term_typed(term, type):
 
     matches = Descriptor.query.filter(Descriptor.name.like('{}%'.format(prefix))).filter_by(type=type)
-    return jsonify(get_descriptor_listed_relatives(
+    return jsonify(make_simple_dict_list(
         sorted(matches,
             key=lambda m:m.name.lower())[:50]))
 
@@ -169,7 +169,7 @@ def search_for_term_typed(term, type):
 @app.route('/ths/search/infix/<string:infix>', methods=['GET'])
 def search_for_infix(infix):
     matches = Descriptor.query.filter(Descriptor.name.like('%{}%'.format(infix))).all()
-    return jsonify(get_descriptor_listed_relatives(
+    return jsonify(make_simple_dict_list(
         sorted(matches,
             key=lambda m:m.name)[:50]))
 
