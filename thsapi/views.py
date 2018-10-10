@@ -1,6 +1,7 @@
-from flask import jsonify
+import werkzeug.exceptions
+from flask import jsonify, Response, request
 
-from thsapi import app, couch, models
+from thsapi import app, couch, models, errors
 
 from thsapi.models import Descriptor, db, taxonomy_table
 
@@ -48,6 +49,14 @@ def tables_populate():
 
 @app.route('/ths/get/<string:thsid>', methods=['GET'])
 def get_descriptor(thsid):
+    """ see if argument value is within expected character count """
+    arglengths = sorted([(a[:32], len(a)) for a in [thsid]],
+            key=lambda al:al[1],
+            reverse=True)
+    if arglengths[0][1] > 26:
+        raise werkzeug.exceptions.RequestURITooLarge(
+                description='refused to compute: argument value `{}` too long ({} chars).'.format(*arglengths[0]))
+    """ try and retrieve entry from database """
     entry = models.get(Descriptor, thsid)
     if entry:
         return jsonify(
@@ -57,7 +66,38 @@ def get_descriptor(thsid):
                 parents=[p.id for p in entry.parents],
                 children=[c.id for c in entry.children])
     else:
-        return '404'
+       raise werkzeug.exceptions.NotFound(description='could not find entry with ID {}'.format(thsid))
+
+
+@app.route('/ths/get/<string:thsid>/<string:field>', methods=['GET'])
+def get_descriptor_field(thsid, field):
+    """ see if requested field is in the model """
+    if field not in [
+            'name',
+            'type',
+            'parents',
+            'children',
+            'roots']:
+        raise werkzeug.exceptions.NotImplemented(
+                description='will not compute: `{}` not in data model.'.format(field))
+
+    """ see if all argument values are within expected character count """
+    arglengths = sorted([(a[:32], len(a)) for a in [thsid, field]],
+            key=lambda al:al[1],
+            reverse=True)
+    if arglengths[0][1] > 26:
+        raise werkzeug.exceptions.RequestURITooLarge(
+                description='refused to compute: argument value `{}` too long ({} chars).'.format(*arglengths[0]))
+
+    """ try and retrieve requested thesaurus entry from database """
+    entry = models.get(Descriptor, thsid)
+    if entry:
+        if field in ['name', 'type']:
+            return Response(entry.__dict__.get(field), mimetype='text/plain')
+        elif field in ['parents', 'children', 'roots']:
+            return jsonify(globals().get('get_descriptor_{}'.format(field))(entry))
+    raise werkzeug.exceptions.NotFound(
+            description='could not find find entry with ID {}'.format(thsid))
 
 
 
@@ -116,8 +156,9 @@ def search_for_prefix(prefix):
             key=lambda m:m.name.lower())[:50]))
 
 
-@app.route('/ths/find/prefix/<string:type>/<string:prefix>', methods=['GET'])
-def search_for_prefix_typed(prefix, type):
+@app.route('/ths/search/<string:type>/<string:position>/<string:term>', methods=['GET'])
+def search_for_term_typed(term, type):
+
     matches = Descriptor.query.filter(Descriptor.name.like('{}%'.format(prefix))).filter_by(type=type)
     return jsonify(get_descriptor_listed_relatives(
         sorted(matches,
@@ -125,7 +166,7 @@ def search_for_prefix_typed(prefix, type):
 
 
 
-@app.route('/ths/find/infix/<string:infix>', methods=['GET'])
+@app.route('/ths/search/infix/<string:infix>', methods=['GET'])
 def search_for_infix(infix):
     matches = Descriptor.query.filter(Descriptor.name.like('%{}%'.format(infix))).all()
     return jsonify(get_descriptor_listed_relatives(
