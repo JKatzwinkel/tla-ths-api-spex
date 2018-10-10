@@ -47,6 +47,15 @@ def tables_populate():
 
 
 
+def urlify(data, path, *args):
+    """ looks up the array fields in `data` specified by the `*args` arguments, assumes those
+    arrays contain actual descriptor IDs, and turns them into URLs using the given `path`. """
+    for arg in args:
+        if arg in data:
+            data[arg] = ['{}{}{}'.format(request.host_url, path, i) for i in data.get(arg)]
+    return data
+
+
 @app.route('/ths/get/<string:thsid>', methods=['GET'])
 def get_descriptor(thsid):
     """ see if argument value is within expected character count """
@@ -59,12 +68,7 @@ def get_descriptor(thsid):
     """ try and retrieve entry from database """
     entry = models.get(Descriptor, thsid)
     if entry:
-        return jsonify(
-                id=entry.id,
-                name=entry.name,
-                type=entry.type,
-                parents=[p.id for p in entry.parents],
-                children=[c.id for c in entry.children])
+        return jsonify(urlify(dict(entry), 'ths/get/', 'parents', 'children'))
     else:
        raise werkzeug.exceptions.NotFound(description='could not find entry with ID {}'.format(thsid))
 
