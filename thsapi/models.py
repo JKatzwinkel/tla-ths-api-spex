@@ -28,6 +28,15 @@ class Descriptor(db.Model):
             secondaryjoin=taxonomy_table.c.parent_id==id,
             backref="children")
 
+    def __iter__(self):
+        """ this is only so that instances can be converted into a dict() """
+        for key in ['id', 'name', 'type']:
+            yield key, self.__dict__.get(key)
+        yield 'parents', [p.id for p in self.parents]
+        yield 'children', [c.id for c in self.children]
+
+
+
 
 
 def get_or_create(model, _id, **kwargs):

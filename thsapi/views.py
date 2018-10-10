@@ -134,28 +134,78 @@ def get_descriptor_roots(entry):
 
 
 
-@app.route('/ths/get/<string:thsid>/<string:field>', methods=['GET'])
-def get_descriptor_field(thsid, field):
-    if len(field) > 24 or field not in [
-            'name',
-            'type',
-            'parents',
-            'children',
-            'roots']:
-        return 500
-    entry = models.get(Descriptor, thsid)
-    if entry:
-        if field in ['name', 'type']:
-            return entry.__dict__.get(field)
-        elif field in ['parents', 'children', 'roots']:
-            return jsonify(globals().get('get_descriptor_{}'.format(field))(entry))
-    return '404'
+@app.route('/ths/search', methods=['POST'])
+def search_descriptors():
+    if request.method == 'POST':
+        """ check for correct content type, but then extract json from body no matter what. """
+        if request.content_type == 'application/json':
+            if request.content_length > 256:
+                """ if body is huge, don't even bother. """
+                raise werkzeug.exceptions.RequestEntityTooLarge(
+                        description='content length of request body is {}. I won\'t accept that.' \
+                                .format(request.content_length))
+            data = request.get_json(force=True)
+            """ type limit search=prefix|contains """
+            if 'term' in data:
+                term = data.get('term')
+            else:
+                """ require `term` field. """
+                raise werkzeug.exceptions.BadRequest(
+                        description='did not specify search `term` field in request body.')
+
+            """ search mode defaults to prefix """
+            mode = data.get('search', 'prefix')
+            if mode not in ['prefix', 'contains']:
+                """ only support these two modes for now. """
+                raise werkzeug.exceptions.BadRequest(
+                        description='unknown search mode `{}` - only `prefix` and `contains`' + \
+                                ' are supported.'.format(mode))
+            query_template = '%{}%' if mode == 'contains' else '{}%'
+
+            """ need thesaurus entry types filter as a list of allowed types """
+            typefilter = data.get('type', [])
+            if type(typefilter) is not list:
+                typefilter = [typefilter]
+
+            """ use limit parameter if available, defaults to 50 """
+            limit = data.get('limit', 50)
+            if type(limit) is str:
+                try:
+                    limit = int(str)
+                except:
+                    raise werkzeug.exceptions.BadRequest(
+                            description='`limit` value must be integer between 1 and 50.')
+            limit = max(min(limit,50),1)
+
+            
+            """ do the actual searching now. """
+            matches = Descriptor.query.filter(Descriptor.name.like(query_template.format(term))) \
+                    .filter(db.or_(
+                        *[Descriptor.type == type_ for type_ in typefilter])).all()
+            results = sorted(matches, key=lambda m:m.name.lower())[:limit]
+
+            """ assemble response """
+            success = len(results) > 0
+            return jsonify(
+                    status = "success" if success else "fail",
+                    message = "God's in HIS heaven all's right with the earth" if success else \
+                            "No results for search term " + \
+                            "'{}' and type filter(s) specified (if any).".format(term),
+                    length = len(results),
+                    result = make_simple_dict_list(results))
+        else:
+            raise werkzeug.exceptions.BadRequest(
+                    description='request has invalid content-type (expected `application/json`):'+\
+                            ' {}.'.format(request.content_type))
 
 
-@app.route('/ths/find/prefix/<string:prefix>', methods=['GET'])
-def search_for_prefix(prefix):
-    matches = Descriptor.query.filter(Descriptor.name.like('{}%'.format(prefix))).all()
-    return jsonify(get_descriptor_listed_relatives(
+
+@app.route('/ths/search/<string:position>/<string:term>', methods=['GET'])
+def search_for_term(term, position):
+
+    """ retrieve matching entries from database """
+    matches = Descriptor.query.filter(Descriptor.name.like('{}%'.format(term))).all()
+    return jsonify(make_simple_dict_list(
         sorted(matches,
             key=lambda m:m.name.lower())[:50]))
 
