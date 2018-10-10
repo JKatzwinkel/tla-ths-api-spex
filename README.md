@@ -7,7 +7,7 @@ wie man thesauruseintraege des berliner altaegyptischen woerterbuches abrufen un
 
 - method: `GET`
 
-Man gibt die 24-stellige ID des thesauruseintrags an und bekommt eine `application/json` response folgender art:
+Man gibt die **26**-stellige (:point_up:) ID des thesauruseintrags an und bekommt eine `application/json` response folgender art:
 
 ```json
     {
@@ -25,7 +25,7 @@ Man gibt die 24-stellige ID des thesauruseintrags an und bekommt eine `applicati
 
 - method: `GET`
 
-Man gibt zusaetzlich zur 24-stelligen ID noch den namen der eigenschaft an, die man haben will. Moeglich sind `name`, `type`, `roots`, `parents`, `children`. Bei letzteren drei erhaelt man eine JSON response mit einer liste (ein eintrag kann mehrere wurzelelemente haben) von objekten mit jeweils `id`, `type` und `name` der verwandten thesauruseintraege. Wenn man `name` oder `type` anfragt, bekommt man eine `text/html` response wo nur der gewuenschte inhalt drin steht.
+Man gibt zusaetzlich zur **26**-stelligen (:point_up:) ID noch den namen der eigenschaft an, die man haben will. Moeglich sind `name`, `type`, `roots`, `parents`, `children`. Bei einem der letzten drei erhaelt man eine JSON response mit einer liste (ein eintrag kann mehrere wurzelelemente haben) von objekten mit jeweils `id`, `type` und `name` der verwandten thesauruseintraege. Wenn man `name` oder `type` anfragt, bekommt man eine `text/html` response wo nur der gewuenschte inhalt drin steht.
 
 ### `/ths/find/prefix/<string:prefix>`
 
@@ -35,7 +35,10 @@ Man sucht eintraege deren `name` feld mit dem angegebenen `prefix` beginnen. Das
 
 Die ergebnisse werden alphabetisch sortiert nach `name` und auf `50` stueck begrenzt. Beispiel:
 
-    -XGET http://tladev.bbaw.de:5002/ths/find/prefix/h
+```bash
+    curl -XGET http://tladev.bbaw.de:5002/ths/find/prefix/h
+```
+```json 
     [
         {
             "type": "location",
@@ -57,6 +60,7 @@ Die ergebnisse werden alphabetisch sortiert nach `name` und auf `50` stueck begr
             "id": "W6EYN4YCLBEV7JGI5JVHLPKRL4",
             "name": "Habachi, Heqaib"
         ...
+```
 
 ### `/ths/find/prefix/<string:type>/<string:prefix>`
 
