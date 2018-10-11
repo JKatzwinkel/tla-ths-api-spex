@@ -11,13 +11,16 @@ Man gibt die **26**-stellige (:point_up:) ID des thesauruseintrags an und bekomm
 `application/json` response folgender art:
 
 ```json
-    {
-      "id": "CLJN6LLO5NDL7DY6HOP4XC4ELE",
-      "name": "Butler, Cuthbert",
-      "type": "person"
-    }
+{
+  "id": "CLJN6LLO5NDL7DY6HOP4XC4ELE",
+  "name": "Butler, Cuthbert",
+  "type": "person"
+}
 ```    
-    
+
+im falle eines fehlers steht im `result`-feld der response ein `null`. 
+
+
 ### `/ths/get/<string:id>/<string:relation>`
 
 - method: `GET`
@@ -33,6 +36,8 @@ von objekten. Wie im endpoint `search` kann der parameter `type` zum filtern ang
   "https://tla.bbaw.de/ths/get/NDLBDCMPELEJNC4Y66FO5S4XHO",
 ]
 ```
+
+im falle eines fehlers steht im `result`-feld der response ein `null`.
 
 
 ### `/ths/search`
@@ -63,9 +68,9 @@ begrenzt. Beispiel:
 
 ```json 
 {
-  "length": 5, 
-  "message": "God's in HIS heaven all's right with the earth", 
-  "result": [
+  "total": 23,  // lti!
+  "offset": 0,
+  "objects": [
     {
       "id": "7QGME3V2XZDN3IJKDWHZJWHEWU", 
       "name": "Haags Gemeentemuseum", 
@@ -92,9 +97,11 @@ begrenzt. Beispiel:
       "type": "bibliography"
     }
   ], 
-  "status": "success"
 }
 ```
+
+
+im falle eines fehlers steht im `result`-feld der response `{"total": 0, "offset": 0,"objects": []}`.
 
 Weitere Beispiele:
 
@@ -106,16 +113,32 @@ curl http://tladev.bbaw.de:5002/ths/search/?term=ha&type=person,location
 
 ## error handling
 
-Der errorhandler gibt fehlermeldungen in folgender form aus:
+## struktur einer response
+
+Jede antwort hat eine kanonische form, die immer einen vollständigen `header` und ein 
+`result`-feld mit inhalt gemäß dem endpoint enthält. die (plain text) `description` im 
+header dient der anzeige für die user und ist bei einem status `error` obligatorisch.
 
 ```json
 {
-  "error": {
-    "code": 404, 
-    "description": "<p>could not find entry with ID TL3NBDJXXZE7RKWNRVQS5TPSB</p>", 
-    "name": "Not Found", 
-    "type": "NotFound"
-  }, 
-  "status": "error"
+  "header": {
+    "status": "success|error",
+    "error code": …,
+    "description": "could not find entry with ID TL3NBDJXXZE7RKWNRVQS5TPSB",
+  },
+  "result":
+     // endpoint-spezifisch 
 }
 ```
+
+liste der error codes (nicht finalisiert):
+
+0 - allet jut
+1 - invalid parameter
+2 - invalid parameter value
+4 - unknown id ?
+
+absichtlich imitieren sie keine http status codes. das aufrufen des `get`-endpunkts mit einer
+validen, aber nicht existenten `id` sollte der reinen lehre nach tatsächlich einen http404
+antworten. ein inkonsistentes design wäre es aber auch - also sollte http404 sich vielleicht 
+doch nur auf die endpunkte an sich beziehen?
