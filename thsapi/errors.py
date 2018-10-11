@@ -9,7 +9,7 @@ from thsapi import app
 def handle_error(error):
     print(dir(error))
     response = {
-            'success': False,
+            'status': "error",
             'error': {
                 'code': error.code,
                 'name': error.name,
