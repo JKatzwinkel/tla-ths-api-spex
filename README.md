@@ -82,3 +82,18 @@ Die ergebnisse werden alphabetisch sortiert nach `name` und auf `limit` oder `50
 }
 ```
 
+## error handling
+
+Der errorhandler gibt fehlermeldungen in folgender form aus:
+
+```json
+{
+  "error": {
+    "code": 404, 
+    "description": "<p>could not find entry with ID TL3NBDJXXZE7RKWNRVQS5TPSB</p>", 
+    "name": "Not Found", 
+    "type": "NotFound"
+  }, 
+  "status": "error"
+}
+```
