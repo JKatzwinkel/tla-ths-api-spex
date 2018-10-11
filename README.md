@@ -29,24 +29,30 @@ Man gibt zusaetzlich zur **26**-stelligen (:point_up:) ID noch den namen der eig
 
 ### `/ths/search`
 
-- method: `POST`
+- method: `GET`
 
-Man sucht eintraege deren `name` feld mit dem angegebenen `term` beginnen. Das ergebnis ist eine liste von objekten, enthalten im `results`-feld der `application/json`-response. Die einzelnen results enthalten jeweils `id`, `name` und `type`.
+Man sucht eintraege deren `name` feld mit dem angegebenen `term` beginnen oder ihn 
+beinhalten. Das ergebnis ist eine liste von objekten, enthalten im `results`-feld der 
+`application/json`-response. Die einzelnen results enthalten jeweils `id`, `name` und 
+`type`.
 
-Im body koennen/muessen folgende parameter angegeben werden:
+Folgende parameter müssen oder können angegeben werden:
 
 |name|range|funktion|default|
 |---|---|---|---|
 |`term`|mindestens 2 zeichen lang|suchbegriff der im `name` vorkommen soll|**required**|
-|`search`|`{prefix\|contains}`|ob `term` am anfang von `name` oder irgendwo steht|`prefix`|
+|`mode`|`{prefix\|contains}`|ob `term` am anfang von `name` oder irgendwo steht|`prefix`|
 |`limit`|1-50, `int`|wie viele ergebnisse maximal|`50`|
-|`type`|einzelner string oder liste von strings|man kriegt nur ergebnisse, deren `type` im parameter genannt ist|
+|`offset`| |Index des ersten Items in den Gesamtergebnissen|`0`|
+|`type`|liste von strings|man kriegt nur ergebnisse, deren `type` im parameter kommagetrent genannt sind|`[]`|
 
-Die ergebnisse werden alphabetisch sortiert nach `name` und auf `limit` oder `50` stueck begrenzt. Beispiel:
+Die ergebnisse werden alphabetisch sortiert nach `name` und auf `limit` oder `50` stueck 
+begrenzt. Beispiel:
 
 ```bash
-    curl -XPOST -HContent-Type:application/json http://tladev.bbaw.de:5002/ths/search -d '{"term":"h","limit":5}'
+    curl http://tladev.bbaw.de:5002/ths/search?term=ha&limit=5
 ```
+
 ```json 
 {
   "length": 5, 
