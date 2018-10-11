@@ -7,25 +7,34 @@ wie man thesauruseintraege des berliner altaegyptischen woerterbuches abrufen un
 
 - method: `GET`
 
-Man gibt die **26**-stellige (:point_up:) ID des thesauruseintrags an und bekommt eine `application/json` response folgender art:
+Man gibt die **26**-stellige (:point_up:) ID des thesauruseintrags an und bekommt eine 
+`application/json` response folgender art:
 
 ```json
     {
-      "children": [],
       "id": "CLJN6LLO5NDL7DY6HOP4XC4ELE",
       "name": "Butler, Cuthbert",
-      "parents": [
-        "http://.../ths/get/OJDRAHAIX5BMND7OQH3TKTG4C4"
-      ],
       "type": "person"
     }
 ```    
     
-### `/ths/get/<string:id>/<string:key>`
+### `/ths/get/<string:id>/<string:relation>`
 
 - method: `GET`
 
-Man gibt zusaetzlich zur **26**-stelligen (:point_up:) ID noch den namen der eigenschaft an, die man haben will. Moeglich sind `name`, `type`, `roots`, `parents`, `children`. Bei einem der letzten drei erhaelt man eine JSON response mit einer liste (ein eintrag kann mehrere wurzelelemente haben) von objekten mit jeweils `id`, `type` und `name` der verwandten thesauruseintraege. Wenn man `name` oder `type` anfragt, bekommt man eine `text/plain` response wo nur der gewuenschte inhalt drin steht.
+Man gibt zusaetzlich zur **26**-stelligen (:point_up:) ID noch den namen der beziehung 
+an, deren objekte man haben will. Moeglich sind `roots`, `parents` und `children`. Man erhält 
+eine JSON response mit einer liste (ein eintrag kann mehrere wurzelelemente haben) von URLs 
+von objekten.
+
+```json
+[
+  "https://tla.bbaw.de/ths/get/CLJN6LLO5NDL7DY6HOP4XC4ELE",
+  "https://tla.bbaw.de/ths/get/NDLBDCMPELEJNC4Y66FO5S4XHO",
+]
+
+```
+
 
 ### `/ths/search`
 
