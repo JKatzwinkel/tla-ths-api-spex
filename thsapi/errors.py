@@ -7,7 +7,6 @@ from thsapi import app
 
 @app.errorhandler(HTTPException)
 def handle_error(error):
-    print(dir(error))
     response = {
             'status': "error",
             'error': {

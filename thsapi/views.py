@@ -7,6 +7,10 @@ from thsapi.models import Descriptor, db, taxonomy_table
 
 db.create_all()
 
+
+DEFAULT_SEARCH_RESULT_LIMIT = 32
+
+
 @app.route('/ths/tables/populate', methods=['GET'])
 def tables_populate():
     ths_collection = couch.server['aaew_ths']
@@ -134,7 +138,7 @@ def get_descriptor_roots(entry):
 
 
 
-@app.route('/ths/search', methods=['POST'])
+@app.route('/ths/search', methods=['GET', 'POST'])
 def search_descriptors():
     if request.method == 'POST':
         """ check for correct content type, but then extract json from body no matter what. """
@@ -144,59 +148,75 @@ def search_descriptors():
                 raise werkzeug.exceptions.RequestEntityTooLarge(
                         description='content length of request body is {}. I won\'t accept that.' \
                                 .format(request.content_length))
+            """ extract parameters from request body """
             data = request.get_json(force=True)
-            """ type limit search=prefix|contains """
-            if 'term' in data:
-                term = data.get('term')
-            else:
-                """ require `term` field. """
-                raise werkzeug.exceptions.BadRequest(
-                        description='did not specify search `term` field in request body.')
-
-            """ search mode defaults to prefix """
-            mode = data.get('search', 'prefix')
-            if mode not in ['prefix', 'contains']:
-                """ only support these two modes for now. """
-                raise werkzeug.exceptions.BadRequest(
-                        description='unknown search mode `{}` - only `prefix` and `contains`' + \
-                                ' are supported.'.format(mode))
-            query_template = '%{}%' if mode == 'contains' else '{}%'
-
-            """ need thesaurus entry types filter as a list of allowed types """
-            typefilter = data.get('type', [])
-            if type(typefilter) is not list:
-                typefilter = [typefilter]
-
-            """ use limit parameter if available, defaults to 50 """
-            limit = data.get('limit', 50)
-            if type(limit) is str:
-                try:
-                    limit = int(str)
-                except:
-                    raise werkzeug.exceptions.BadRequest(
-                            description='`limit` value must be integer between 1 and 50.')
-            limit = max(min(limit,50),1)
-
-            
-            """ do the actual searching now. """
-            matches = Descriptor.query.filter(Descriptor.name.like(query_template.format(term))) \
-                    .filter(db.or_(
-                        *[Descriptor.type == type_ for type_ in typefilter])).all()
-            results = sorted(matches, key=lambda m:m.name.lower())[:limit]
-
-            """ assemble response """
-            success = len(results) > 0
-            return jsonify(
-                    status = "success" if success else "fail",
-                    message = "God's in HIS heaven all's right with the earth" if success else \
-                            "No results for search term " + \
-                            "'{}' and type filter(s) specified (if any).".format(term),
-                    length = len(results),
-                    result = make_simple_dict_list(results))
         else:
             raise werkzeug.exceptions.BadRequest(
                     description='request has invalid content-type (expected `application/json`):'+\
                             ' {}.'.format(request.content_type))
+    else:
+        """ http method GET """
+        data = {param:request.args.get(param) for param in 
+                ['term', 'mode', 'limit', 'type', 'offset'] if param in request.args}
+        if 'type' in data:
+            data['type'] = data.get('type').split(',')
+
+
+    """ type limit search=prefix|contains """
+    if 'term' in data:
+        term = data.get('term')
+    else:
+        """ require `term` field. """
+        raise werkzeug.exceptions.BadRequest(
+                description='did not specify search `term` field.')
+
+    """ search mode defaults to prefix """
+    mode = data.get('mode', 'prefix')
+    if mode not in ['prefix', 'contains']:
+        """ only support these two modes for now. """
+        raise werkzeug.exceptions.BadRequest(
+                description='unknown search mode `{}` - only `prefix` and `contains`' + \
+                        ' are supported.'.format(mode))
+    query_template = '%{}%' if mode == 'contains' else '{}%'
+
+    """ need thesaurus entry types filter as a list of allowed types """
+    typefilter = data.get('type', [])
+    if type(typefilter) is not list:
+        typefilter = [typefilter]
+
+    """ use limit parameter if available, defaults to DEFAULT_SEARCH_RESULT_LIMIT """
+    limit = data.get('limit', DEFAULT_SEARCH_RESULT_LIMIT)
+    if type(limit) is str:
+        try:
+            limit = int(limit)
+        except Exception as e:
+            raise werkzeug.exceptions.BadRequest(
+                    description='`limit` value must be integer between 1 and {} (got {}).'.format(
+                        DEFAULT_SEARCH_RESULT_LIMIT, limit))
+    limit = max(min(limit,DEFAULT_SEARCH_RESULT_LIMIT),1)
+
+    """ use offset if available """
+    offset = data.get('offset', 0)
+    if type(offset) is str:
+        try:
+            offset = int(offset)
+        except:
+            offset = 0
+    
+    """ do the actual searching now. """
+    matches = Descriptor.query.filter(Descriptor.name.like(query_template.format(term))) \
+            .filter(db.or_(
+                *[Descriptor.type == type_ for type_ in typefilter])).all()
+    results = sorted(matches, key=lambda m:m.name.lower())[offset:limit]
+
+    """ assemble response """
+    success = len(results) > 0
+    return jsonify(
+            status = "success" if success else "fail",
+            total = len(results),
+            offset = offset,
+            objects = make_simple_dict_list(results))
+      
 
 
 
