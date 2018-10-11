@@ -1,7 +1,7 @@
 import werkzeug.exceptions
 from flask import jsonify, Response, request
 
-from thsapi import app, couch, models, errors
+from thsapi import app, couch, models
 
 from thsapi.models import Descriptor, db, taxonomy_table
 
@@ -72,7 +72,12 @@ def get_descriptor(thsid):
     """ try and retrieve entry from database """
     entry = models.get(Descriptor, thsid)
     if entry:
-        return jsonify(urlify(dict(entry), 'ths/get/', 'parents', 'children'))
+        resp = urlify(dict(entry),
+                'ths/get/',
+                'parents',
+                'children')
+        resp["status"] = "success"
+        return resp
     else:
        raise werkzeug.exceptions.NotFound(description='could not find entry with ID {}'.format(thsid))
 
@@ -211,11 +216,11 @@ def search_descriptors():
 
     """ assemble response """
     success = len(results) > 0
-    return jsonify(
+    return dict(
             status = "success" if success else "fail",
             total = len(results),
             offset = offset,
-            objects = make_simple_dict_list(results))
+            objects = make_simple_dict_list(results)), 200
       
 
 
