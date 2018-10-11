@@ -25,7 +25,7 @@ Man gibt die **26**-stellige (:point_up:) ID des thesauruseintrags an und bekomm
 
 - method: `GET`
 
-Man gibt zusaetzlich zur **26**-stelligen (:point_up:) ID noch den namen der eigenschaft an, die man haben will. Moeglich sind `name`, `type`, `roots`, `parents`, `children`. Bei einem der letzten drei erhaelt man eine JSON response mit einer liste (ein eintrag kann mehrere wurzelelemente haben) von objekten mit jeweils `id`, `type` und `name` der verwandten thesauruseintraege. Wenn man `name` oder `type` anfragt, bekommt man eine `text/html` response wo nur der gewuenschte inhalt drin steht.
+Man gibt zusaetzlich zur **26**-stelligen (:point_up:) ID noch den namen der eigenschaft an, die man haben will. Moeglich sind `name`, `type`, `roots`, `parents`, `children`. Bei einem der letzten drei erhaelt man eine JSON response mit einer liste (ein eintrag kann mehrere wurzelelemente haben) von objekten mit jeweils `id`, `type` und `name` der verwandten thesauruseintraege. Wenn man `name` oder `type` anfragt, bekommt man eine `text/plain` response wo nur der gewuenschte inhalt drin steht.
 
 ### `/ths/search`
 
