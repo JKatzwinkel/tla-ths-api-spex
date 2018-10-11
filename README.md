@@ -1,5 +1,27 @@
 # tla-ths-api-spex
+
 wie man thesauruseintraege des berliner altaegyptischen woerterbuches abrufen und suchen soll
+
+
+## struktur einer response & error signaling
+
+Jede antwort hat eine kanonische form, die immer einen vollständigen `header` und ein 
+`result`-feld mit inhalt gemäß dem endpoint enthält. die (plain text) `description` im 
+header dient der anzeige für die user und ist bei einem status `error` obligatorisch.
+
+```json
+{
+  "header": {
+    "status": "success|error",
+    "code": …,
+    "description": "could not find entry with ID TL3NBDJXXZE7RKWNRVQS5TPSB",
+    "object_base_url": "http://tladev.bbaw.de/get/{id}"
+  },
+  "result":
+     // endpoint-spezifisch 
+}
+```
+
 
 ## endpunkte
 
@@ -32,8 +54,8 @@ von objekten. Wie im endpoint `search` kann der parameter `type` zum filtern ang
 
 ```json
 [
-  "https://tla.bbaw.de/ths/get/CLJN6LLO5NDL7DY6HOP4XC4ELE",
-  "https://tla.bbaw.de/ths/get/NDLBDCMPELEJNC4Y66FO5S4XHO",
+  "CLJN6LLO5NDL7DY6HOP4XC4ELE",
+  "NDLBDCMPELEJNC4Y66FO5S4XHO",
 ]
 ```
 
@@ -109,36 +131,3 @@ Weitere Beispiele:
 curl http://tladev.bbaw.de:5002/ths/search/?term=ha&type=person,location
 
 ```
-
-
-## error handling
-
-## struktur einer response
-
-Jede antwort hat eine kanonische form, die immer einen vollständigen `header` und ein 
-`result`-feld mit inhalt gemäß dem endpoint enthält. die (plain text) `description` im 
-header dient der anzeige für die user und ist bei einem status `error` obligatorisch.
-
-```json
-{
-  "header": {
-    "status": "success|error",
-    "error code": …,
-    "description": "could not find entry with ID TL3NBDJXXZE7RKWNRVQS5TPSB",
-  },
-  "result":
-     // endpoint-spezifisch 
-}
-```
-
-liste der error codes (nicht finalisiert):
-
-0 - allet jut
-1 - invalid parameter
-2 - invalid parameter value
-4 - unknown id ?
-
-absichtlich imitieren sie keine http status codes. das aufrufen des `get`-endpunkts mit einer
-validen, aber nicht existenten `id` sollte der reinen lehre nach tatsächlich einen http404
-antworten. ein inkonsistentes design wäre es aber auch - also sollte http404 sich vielleicht 
-doch nur auf die endpunkte an sich beziehen?
