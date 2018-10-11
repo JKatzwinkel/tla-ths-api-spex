@@ -25,14 +25,13 @@ Man gibt die **26**-stellige (:point_up:) ID des thesauruseintrags an und bekomm
 Man gibt zusaetzlich zur **26**-stelligen (:point_up:) ID noch den namen der beziehung 
 an, deren objekte man haben will. Moeglich sind `roots`, `parents` und `children`. Man erhält 
 eine JSON response mit einer liste (ein eintrag kann mehrere wurzelelemente haben) von URLs 
-von objekten.
+von objekten. Wie im endpoint `search` kann der parameter `type` zum filtern angegeben werden.
 
 ```json
 [
   "https://tla.bbaw.de/ths/get/CLJN6LLO5NDL7DY6HOP4XC4ELE",
   "https://tla.bbaw.de/ths/get/NDLBDCMPELEJNC4Y66FO5S4XHO",
 ]
-
 ```
 
 
@@ -96,6 +95,14 @@ begrenzt. Beispiel:
   "status": "success"
 }
 ```
+
+Weitere Beispiele:
+
+```bash
+curl http://tladev.bbaw.de:5002/ths/search/?term=ha&type=person,location
+
+```
+
 
 ## error handling
 
