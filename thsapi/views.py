@@ -210,8 +210,11 @@ def search_descriptors():
     
     """ do the actual searching now. """
     matches = Descriptor.query.filter(Descriptor.name.like(query_template.format(term))) \
-            .filter(db.or_(
-                *[Descriptor.type == type_ for type_ in typefilter])).all()
+            .filter(
+                    db.or_(
+                        *[Descriptor.type == type_ for type_ in typefilter]
+                        )
+                    ).all()
     results = sorted(matches, key=lambda m:m.name.lower())[offset:limit]
 
     """ assemble response """
