@@ -37,7 +37,10 @@ class ApiResponse(Response):
                 }
         if type(view_response) is dict:
             response["result"] = view_response
-            response["header"]["status"] = view_response.get("status", "error")
+            for key in ["status", "description"]:
+                if key in view_response:
+                    response["header"][key] = view_response.get(key)
+                    del view_response[key]
 
         return super(ApiResponse, cls).force_type(jsonify(response), environ)
 

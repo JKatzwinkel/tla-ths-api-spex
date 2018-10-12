@@ -220,6 +220,7 @@ def search_descriptors():
             status = "success" if success else "fail",
             total = len(results),
             offset = offset,
+            description = "Found {} results for search term '{}'.".format(len(results), term),
             objects = make_simple_dict_list(results)), 200
       
 
