@@ -1,5 +1,27 @@
 # tla-ths-api-spex
+
 wie man thesauruseintraege des berliner altaegyptischen woerterbuches abrufen und suchen soll
+
+
+## struktur einer response & error signaling
+
+Jede antwort hat eine kanonische form, die immer einen vollständigen `header` und ein 
+`result`-feld mit inhalt gemäß dem endpoint enthält. die (plain text) `description` im 
+header dient der anzeige für die user und ist bei einem status `error` obligatorisch.
+
+```json
+{
+  "header": {
+    "status": "success|error",
+    "code": …,
+    "description": "could not find entry with ID TL3NBDJXXZE7RKWNRVQS5TPSB",
+    "object_base_url": "http://tladev.bbaw.de/get/{id}"
+  },
+  "result":
+     // endpoint-spezifisch 
+}
+```
+
 
 ## endpunkte
 
@@ -7,25 +29,38 @@ wie man thesauruseintraege des berliner altaegyptischen woerterbuches abrufen un
 
 - method: `GET`
 
-Man gibt die **26**-stellige (:point_up:) ID des thesauruseintrags an und bekommt eine `application/json` response folgender art:
+Man gibt die **26**-stellige (:point_up:) ID des thesauruseintrags an und bekommt eine 
+`application/json` response folgender art:
 
 ```json
-    {
-      "children": [],
-      "id": "CLJN6LLO5NDL7DY6HOP4XC4ELE",
-      "name": "Butler, Cuthbert",
-      "parents": [
-        "http://.../ths/get/OJDRAHAIX5BMND7OQH3TKTG4C4"
-      ],
-      "type": "person"
-    }
+{
+  "id": "CLJN6LLO5NDL7DY6HOP4XC4ELE",
+  "name": "Butler, Cuthbert",
+  "type": "person"
+}
 ```    
-    
-### `/ths/get/<string:id>/<string:key>`
+
+im falle eines fehlers steht im `result`-feld der response ein `null`. 
+
+
+### `/ths/get/<string:id>/<string:relation>`
 
 - method: `GET`
 
-Man gibt zusaetzlich zur **26**-stelligen (:point_up:) ID noch den namen der eigenschaft an, die man haben will. Moeglich sind `name`, `type`, `roots`, `parents`, `children`. Bei einem der letzten drei erhaelt man eine JSON response mit einer liste (ein eintrag kann mehrere wurzelelemente haben) von objekten mit jeweils `id`, `type` und `name` der verwandten thesauruseintraege. Wenn man `name` oder `type` anfragt, bekommt man eine `text/plain` response wo nur der gewuenschte inhalt drin steht.
+Man gibt zusaetzlich zur **26**-stelligen (:point_up:) ID noch den namen der beziehung 
+an, deren objekte man haben will. Moeglich sind `roots`, `parents` und `children`. Man erhält 
+eine JSON response mit einer liste (ein eintrag kann mehrere wurzelelemente haben) von URLs 
+von objekten. Wie im endpoint `search` kann der parameter `type` zum filtern angegeben werden.
+
+```json
+[
+  "CLJN6LLO5NDL7DY6HOP4XC4ELE",
+  "NDLBDCMPELEJNC4Y66FO5S4XHO",
+]
+```
+
+im falle eines fehlers steht im `result`-feld der response ein `null`.
+
 
 ### `/ths/search`
 
@@ -55,9 +90,9 @@ begrenzt. Beispiel:
 
 ```json 
 {
-  "length": 5, 
-  "message": "God's in HIS heaven all's right with the earth", 
-  "result": [
+  "total": 23,  // lti!
+  "offset": 0,
+  "objects": [
     {
       "id": "7QGME3V2XZDN3IJKDWHZJWHEWU", 
       "name": "Haags Gemeentemuseum", 
@@ -84,22 +119,15 @@ begrenzt. Beispiel:
       "type": "bibliography"
     }
   ], 
-  "status": "success"
 }
 ```
 
-## error handling
 
-Der errorhandler gibt fehlermeldungen in folgender form aus:
+im falle eines fehlers steht im `result`-feld der response `{"total": 0, "offset": 0,"objects": []}`.
 
-```json
-{
-  "error": {
-    "code": 404, 
-    "description": "<p>could not find entry with ID TL3NBDJXXZE7RKWNRVQS5TPSB</p>", 
-    "name": "Not Found", 
-    "type": "NotFound"
-  }, 
-  "status": "error"
-}
+Weitere Beispiele:
+
+```bash
+curl http://tladev.bbaw.de:5002/ths/search/?term=ha&type=person,location
+
 ```
