@@ -6,9 +6,9 @@ url = "https://pypi.org/simple"
 [packages]
 couchdb = "*"
 flask-sqlalchemy = "*"
-ipython = "*"
 
 [dev-packages]
+ipython = "*"
 
 [requires]
 python_version = "3.5"
