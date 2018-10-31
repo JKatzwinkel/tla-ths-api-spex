@@ -2,8 +2,9 @@ import couchdb
 
 from thsapi import app
 
-server = couchdb.Server(app.config['COUCHDB_SERVER_URL'])
-server.resource.credentials = (app.config['COUCHDB_SERVER_USER'], app.config['COUCHDB_SERVER_PASS'])
+if all(map(lambda k:k in app.config, ['COUCHDB_SERVER_URL', 'COUCHDB_SERVER_USER', 'COUCHDB_SERVER_PASS'])):
+    server = couchdb.Server(app.config['COUCHDB_SERVER_URL'])
+    server.resource.credentials = (app.config['COUCHDB_SERVER_USER'], app.config['COUCHDB_SERVER_PASS'])
 
 
 def apply_view(collection, view_name):
