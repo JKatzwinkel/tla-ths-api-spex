@@ -9,5 +9,6 @@ if all(map(lambda k:k in app.config, ['COUCHDB_SERVER_URL', 'COUCHDB_SERVER_USER
 
 def apply_view(collection, view_name):
     for row in collection.view(view_name):
-        yield row.value
+        if row.value.get('revisionState') == 'published':
+            yield row.value
 
