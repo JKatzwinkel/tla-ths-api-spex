@@ -6,10 +6,10 @@ url = "https://pypi.org/simple"
 [packages]
 couchdb = "*"
 flask-sqlalchemy = "*"
-ipython = "*"
 docker-compose = "*"
 
 [dev-packages]
+ipython = "*"
 
 [requires]
 python_version = "3.5"

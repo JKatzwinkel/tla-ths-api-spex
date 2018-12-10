@@ -3,7 +3,7 @@ from werkzeug.exceptions import HTTPException
 
 
 app = Flask(__name__)
-app.config.from_pyfile('config.cfg', silent=True)
+app.config.from_pyfile('../config.cfg', silent=False)
 
 
 @app.errorhandler(HTTPException)

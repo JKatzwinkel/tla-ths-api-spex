@@ -2,7 +2,10 @@ from flask_sqlalchemy import SQLAlchemy
 
 from thsapi import app
 
+
 db = SQLAlchemy(app)
+
+print('Connected to database at {}.'.format(db.engine.url))
 
 
 taxonomy_table = db.Table('taxonomy', db.Model.metadata,

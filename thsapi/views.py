@@ -13,8 +13,13 @@ DEFAULT_SEARCH_RESULT_LIMIT = 32
 
 @app.route('/ths/tables/populate', methods=['GET'])
 def tables_populate():
-    ths_collection = couch.server['aaew_ths']
-    view = couch.apply_view(ths_collection, 'ths/all_active_thsentry_objects')
+    try:
+        ths_collection = couch.server['aaew_ths']
+    except couch.couchdb.http.Unauthorized:
+        raise werkzeug.exceptions.Unauthorized()
+    view = couch.apply_view(
+            ths_collection,
+            'ths/all_active_thsentry_objects')
     relations = {}
     # re-populate descriptor table
     Descriptor.query.delete()
@@ -48,6 +53,21 @@ def tables_populate():
 
     db.session.commit()
     return 'Populated descriptor table with {} entries'.format(len(relations))
+
+
+@app.route('/ths/tables/status', methods=['GET'])
+def tables_status():
+    row_counts = {k: db.session.execute(
+            'SELECT count(*) FROM {}'.format(tablename)
+            ).first()[0] for k, tablename in {
+                'descriptors': Descriptor.__tablename__,
+                'relations': 'taxonomy'}.items()
+            }
+    return dict(
+            status = "success",
+            description = "Database status",
+            objects = row_counts,
+                ), 200
 
 
 
