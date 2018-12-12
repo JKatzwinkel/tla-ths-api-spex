@@ -1,0 +1,6 @@
+version: '3'
+services:
+  thsapi:
+    build: .
+    ports:
+      - ${LISTEN_PORT}:5000
