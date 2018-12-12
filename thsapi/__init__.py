@@ -1,9 +1,11 @@
 from flask import Flask, Response, jsonify, request
 from werkzeug.exceptions import HTTPException
+from flask_cors import CORS
 
 
 app = Flask(__name__)
 app.config.from_pyfile('../config.cfg', silent=False)
+cors = CORS(app, resources={r'/ths/*': {'origins': '*'}})
 
 
 @app.errorhandler(HTTPException)
