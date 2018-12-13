@@ -23,11 +23,15 @@ def connect(url=app.config.get("COUCHDB_SERVER_URL"), user=None, passwd=None):
     at the specified url, and returns a server object. """
     if not (user and passwd and url):
         server = _connect_default()
-    elif url and not (url == app.config.get("COUCHDB_SERVER_URL")):
+    elif url:
         server = couchdb.Server(url)
         if user and passwd:
             server.resource.credentials = (user, passwd)
     else:
+        return None
+    try:
+        server.stats()
+    except couchdb.http.Unauthorized:
         server = None
     return server
 

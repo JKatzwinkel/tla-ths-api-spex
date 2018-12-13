@@ -1,3 +1,5 @@
+from functools import wraps
+
 from flask import Flask, Response, jsonify, request
 from werkzeug.exceptions import HTTPException
 from flask_cors import CORS
@@ -45,9 +47,39 @@ class ApiResponse(Response):
                     response["header"][key] = view_response.get(key)
                     del view_response[key]
 
+        elif type(view_response) == Response:
+            return view_response
+
         return super(ApiResponse, cls).force_type(jsonify(response), environ)
 
 
 app.response_class = ApiResponse
+
+from . import couch
+
+
+def resp_pls_auth():
+    """ returns a 401 response prompting for basic auth. """
+    return Response(
+        "Service requires login",
+        401,
+        {"WWW-Authenticate": 'Basic realm="Login Required"'},
+    )
+
+
+def requires_auth(f):
+    """ decorator for use with view functions that require authentication
+    at the couchdb server. """
+
+    @wraps(f)
+    def inner(*args, **kwargs):
+        auth = request.authorization
+        if not (auth and couch.connect(user=auth.username, passwd=auth.password)):
+            return resp_pls_auth()
+        kwargs = {**kwargs, **auth}
+        return f(*args, **kwargs)
+
+    return inner
+
 
 from thsapi import views

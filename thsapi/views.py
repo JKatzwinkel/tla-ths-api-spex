@@ -2,6 +2,7 @@ import werkzeug.exceptions
 from flask import jsonify, Response, request
 
 from thsapi import app, couch, models
+from thsapi import requires_auth
 
 from thsapi.models import Descriptor, db, taxonomy_table
 
@@ -12,12 +13,14 @@ DEFAULT_SEARCH_RESULT_LIMIT = 32
 
 
 @app.route("/ths/tables/populate", methods=["GET"])
-def tables_populate():
+@requires_auth
+def tables_populate(username=None, password=None):
     try:
-        server = couch.connect()
+        server = couch.connect(user=username, passwd=password)
         ths_collection = server["aaew_ths"]
     except couch.couchdb.http.Unauthorized:
-        raise werkzeug.exceptions.Unauthorized()
+        raise werkzeug.exceptions.Forbidden()
+
     view = couch.apply_view(ths_collection, "ths/all_active_thsentry_objects")
     relations = {}
     # re-populate descriptor table
