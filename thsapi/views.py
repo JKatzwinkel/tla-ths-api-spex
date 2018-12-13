@@ -1,10 +1,11 @@
 import werkzeug.exceptions
 from flask import jsonify, Response, request
 
-from thsapi import app, couch, models
-from thsapi import requires_auth
+from . import app, couch, models
+from . import requires_auth
+from . import get_version
 
-from thsapi.models import Descriptor, db, taxonomy_table
+from .models import Descriptor, db, taxonomy_table
 
 db.create_all()
 
@@ -33,7 +34,12 @@ def tables_status():
         }.items()
     }
     return (
-        dict(status="success", description="Database status", objects=row_counts),
+        dict(
+            status="success",
+            description="Database status",
+            objects=row_counts,
+            api_version=get_version(),
+        ),
         200,
     )
 

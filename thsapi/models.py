@@ -1,6 +1,6 @@
 from flask_sqlalchemy import SQLAlchemy
 
-from thsapi import app
+from . import app
 
 
 db = SQLAlchemy(app)

@@ -1,6 +1,6 @@
 import couchdb
 
-from thsapi import app
+from . import app
 
 
 def _connect_default():

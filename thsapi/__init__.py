@@ -1,4 +1,5 @@
 from functools import wraps
+import pkg_resources
 
 from flask import Flask, Response, jsonify, request
 from werkzeug.exceptions import HTTPException
@@ -9,6 +10,15 @@ import click
 app = Flask(__name__)
 app.config.from_pyfile("../config.cfg", silent=False)
 cors = CORS(app, resources={r"/ths/*": {"origins": "*"}})
+
+
+def get_version():
+    """ returns the version of this project given it has been installed """
+    try:
+        pkgs = pkg_resources.require("thsapi")
+        return pkgs[0].version
+    except:
+        return "0.0.0"
 
 
 @app.errorhandler(HTTPException)
