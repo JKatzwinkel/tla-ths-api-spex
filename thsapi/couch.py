@@ -42,3 +42,16 @@ def apply_view(collection, view_name):
     for row in collection.view(view_name):
         if row.value.get("revisionState") == "published":
             yield row.value
+
+
+def retrieve_ths_entries(user, passwd):
+    """ connects to a couchdb server, opens the 'aaew_ths' collection,
+    and queries a stored view that returns all public thesaurus entries in there.
+    Might raise an exception (e.g. couchdb.http.Unauthorized)"""
+    srv = connect(user=user, passwd=passwd)
+    if srv:
+        ths_collection = srv["aaew_ths"]
+        yield from apply_view(ths_collection, "ths/all_active_thsentry_objects")
+    else:
+        print("could not connect to couchdb server")
+        return []

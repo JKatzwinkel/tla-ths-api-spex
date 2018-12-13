@@ -8,3 +8,4 @@ ENV FLASK_APP="thsapi" \
 COPY . /app
 WORKDIR /app
 RUN pip install .
+RUN flask init-db

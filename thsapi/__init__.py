@@ -3,6 +3,7 @@ from functools import wraps
 from flask import Flask, Response, jsonify, request
 from werkzeug.exceptions import HTTPException
 from flask_cors import CORS
+import click
 
 
 app = Flask(__name__)
@@ -25,13 +26,15 @@ def handle_error(error):
 
 
 class ApiResponse(Response):
-    """ custom response class that allows for views to return a dict instead of json responses,
-    and throws a few fields into the response which are expected by the client. """
+    """ custom response class that allows for views to return a dict instead of json
+    responses, and throws a few fields into the response which are expected by the
+    client. """
 
     @classmethod
     def force_type(cls, view_response, environ=None):
-        """ necessary in case a view returns a dict instead of the built-in response/view return
-        types. This will be called by the framework in case the view return type is not supported.
+        """ necessary in case a view returns a dict instead of the built-in
+        response/view return types. This will be called by the framework in case
+        the view return type is not supported.
         """
         response = {
             "header": {
@@ -82,4 +85,15 @@ def requires_auth(f):
     return inner
 
 
-from thsapi import views
+from . import views
+
+
+@app.cli.command()
+@click.argument("user", default=app.config.get("COUCHDB_SERVER_USER"))
+@click.argument("password", default=app.config.get("COUCHDB_SERVER_PASS"))
+def init_db(user, password):
+    """ populates the database tables with thesaurus entries from the
+    specified couchdb server. """
+    docs = couch.retrieve_ths_entries(user, password)
+    cnt = models.fill_tables_from_couchdb(docs)
+    print("populated db tables with {} thesaurus items.".format(cnt))

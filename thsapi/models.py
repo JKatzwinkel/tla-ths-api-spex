@@ -63,3 +63,40 @@ def get(model, _id):
         return model.query.filter_by(id=_id).one()
     except:
         return None
+
+
+def fill_tables_from_couchdb(documents):
+    """ processes all documents in the passed iterable and turns them
+    into Descriptor instances and relations which are then stored into the tables
+    where they are meant to go.
+    Returns the number of descriptors saved to database. """
+    relations = {}
+    # re-populate descriptor table
+    Descriptor.query.delete()
+    for doc in documents:
+        _id = doc.get("_id")
+        obj = Descriptor(
+            id=_id, name=doc.get("name"), type=doc.get("type") or "undefined"
+        )
+        relations[_id] = set()
+        # prepare relationship insertions for next step
+        for rel in doc.get("relations", []):
+            # use only `partOf` relations
+            if rel.get("type") == "partOf" and rel.get("objectId") is not None:
+                relations[_id].add(rel.get("objectId"))
+
+        db.session.add(obj)
+
+    db.session.commit()
+
+    # re-populate relations table (taxonomy)
+    db.session.execute(taxonomy_table.delete())
+    insertions = []
+    for child_id, parent_ids in relations.items():
+        for parent_id in parent_ids:
+            if parent_id in relations:
+                insertions.append({"parent_id": parent_id, "child_id": child_id})
+    db.session.execute(taxonomy_table.insert(), insertions)
+    db.session.commit()
+
+    return len(relations)
