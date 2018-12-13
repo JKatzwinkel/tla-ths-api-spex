@@ -5,41 +5,41 @@ from thsapi import app
 
 db = SQLAlchemy(app)
 
-print('Connected to database at {}.'.format(db.engine.url))
+print("Connected to database at {}.".format(db.engine.url))
 
 
-taxonomy_table = db.Table('taxonomy', db.Model.metadata,
-        db.Column('parent_id', db.String(26), db.ForeignKey('descriptor.id')),
-        db.Column('child_id', db.String(26), db.ForeignKey('descriptor.id'))
-        )
-        
+taxonomy_table = db.Table(
+    "taxonomy",
+    db.Model.metadata,
+    db.Column("parent_id", db.String(26), db.ForeignKey("descriptor.id")),
+    db.Column("child_id", db.String(26), db.ForeignKey("descriptor.id")),
+)
 
 
 class Descriptor(db.Model):
     """ model for an entry in the TLA thesaurus, which is a controlled vocabulary made
     up of descriptors that are being used to describe metadata of ancient egyptian texts
     and artifacts. """
-    
-    __tablename__ = 'descriptor'
+
+    __tablename__ = "descriptor"
 
     id = db.Column(db.String(26), unique=True, nullable=False, primary_key=True)
     name = db.Column(db.String(200), nullable=False)
     type = db.Column(db.String(80), nullable=False)
-    parents = db.relationship("Descriptor",
-            secondary=taxonomy_table,
-            primaryjoin=taxonomy_table.c.child_id==id,
-            secondaryjoin=taxonomy_table.c.parent_id==id,
-            backref="children")
+    parents = db.relationship(
+        "Descriptor",
+        secondary=taxonomy_table,
+        primaryjoin=taxonomy_table.c.child_id == id,
+        secondaryjoin=taxonomy_table.c.parent_id == id,
+        backref="children",
+    )
 
     def __iter__(self):
         """ this is only so that instances can be converted into a dict() """
-        for key in ['id', 'name', 'type']:
+        for key in ["id", "name", "type"]:
             yield key, self.__dict__.get(key)
-        yield 'parents', [p.id for p in self.parents]
-        yield 'children', [c.id for c in self.children]
-
-
-
+        yield "parents", [p.id for p in self.parents]
+        yield "children", [c.id for c in self.children]
 
 
 def get_or_create(model, _id, **kwargs):
@@ -63,5 +63,3 @@ def get(model, _id):
         return model.query.filter_by(id=_id).one()
     except:
         return None
-
-
