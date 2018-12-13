@@ -14,7 +14,8 @@ DEFAULT_SEARCH_RESULT_LIMIT = 32
 @app.route('/ths/tables/populate', methods=['GET'])
 def tables_populate():
     try:
-        ths_collection = couch.server['aaew_ths']
+        server = couch.connect()
+        ths_collection = server['aaew_ths']
     except couch.couchdb.http.Unauthorized:
         raise werkzeug.exceptions.Unauthorized()
     view = couch.apply_view(
