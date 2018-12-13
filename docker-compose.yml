@@ -1,9 +1,10 @@
 version: '3'
 services:
   thsapi:
-    build: .
-    args:
-      couchdb_user: ${COUCHDB_SERVER_USER}
-      couchdb_pass: ${COUCHDB_SERVER_PASS}
+    build: 
+      context: .
+      args:
+        couchdb_user: ${COUCHDB_SERVER_USER}
+        couchdb_pass: ${COUCHDB_SERVER_PASS}
     ports:
       - ${LISTEN_PORT}:5000
