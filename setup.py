@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-VERSION = '0.1.1'
+VERSION = '0.1.101'
 
 setup(
         name='thsapi',
@@ -12,5 +12,7 @@ setup(
             'flask-sqlalchemy',
             'flask-cors',
             'couchdb',
+            'SQLAlchemy>=1.3.0',
+            'Jinja2>=2.10.1',
             ],
         )

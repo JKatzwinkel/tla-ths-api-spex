@@ -7,10 +7,11 @@ url = "https://pypi.org/simple"
 couchdb = "*"
 flask-sqlalchemy = "*"
 flask-cors = "*"
+Jinja2 = ">=2.10.1"
+SQLAlchemy = ">=1.3.0"
 
 [dev-packages]
 ipython = "*"
-black = "*"
 
 [requires]
 python_version = "3.7"
