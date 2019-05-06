@@ -90,7 +90,7 @@ begrenzt. Beispiel:
 
 ```json 
 {
-  "total": 23,  // lti!
+  "total": 23,
   "offset": 0,
   "objects": [
     {
@@ -128,6 +128,6 @@ im falle eines fehlers steht im `result`-feld der response `{"total": 0, "offset
 Weitere Beispiele:
 
 ```bash
-curl http://tladev.bbaw.de:5002/ths/search/?term=ha&type=person,location
+curl http://tladev.bbaw.de:5002/ths/search?term=ha&type=person,location
 
 ```
